@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.1.0-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
   <img src="https://img.shields.io/badge/bash-5.0%2B-orange.svg" alt="Bash">
   <img src="https://img.shields.io/badge/homebrew-tap-FBB040.svg" alt="Homebrew">
@@ -48,6 +48,7 @@ You have coding standards. Your team ignores them. Code reviews catch issues too
 - 🪝 **Git native** - Installs as a standard pre-commit hook
 - ⚙️ **Highly configurable** - File patterns, exclusions, custom rules
 - 🚨 **Strict mode** - Fail CI on ambiguous responses
+- ⚡ **Smart caching** - Skip unchanged files for faster reviews
 - 🍺 **Homebrew ready** - One command install
 
 ---
@@ -79,7 +80,7 @@ cd gga
 
 ```bash
 gga version
-# Output: gga v1.0.0
+# Output: gga v2.1.0
 ```
 
 ---
@@ -116,7 +117,7 @@ $ cd ~/projects/my-react-app
 $ gga init
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Gentleman Guardian Angel v1.0.0
+  Gentleman Guardian Angel v2.1.0
   Provider-agnostic code review using AI
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -178,7 +179,7 @@ EOF
 $ gga install
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Gentleman Guardian Angel v1.0.0
+  Gentleman Guardian Angel v2.1.0
   Provider-agnostic code review using AI
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -192,13 +193,14 @@ $ git add src/components/Button.tsx
 $ git commit -m "feat: add new button component"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Gentleman Guardian Angel v1.0.0
+  Gentleman Guardian Angel v2.1.0
   Provider-agnostic code review using AI
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ℹ️  Provider: claude
 ℹ️  Rules file: AGENTS.md
 ℹ️  File patterns: *.ts,*.tsx,*.js,*.jsx
+ℹ️  Cache: enabled
 
 Files to review:
   - src/components/Button.tsx
@@ -233,11 +235,13 @@ $ git add src/components/Button.tsx
 $ git commit -m "feat: add new button component"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Gentleman Guardian Angel v1.0.0
+  Gentleman Guardian Angel v2.1.0
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ℹ️  Provider: claude
-ℹ️  Files to review:
+ℹ️  Cache: enabled
+
+Files to review:
   - src/components/Button.tsx
 
 ℹ️  Sending to claude for review...
@@ -262,8 +266,12 @@ All files comply with the coding standards defined in AGENTS.md.
 | `init` | Create sample `.gga` config file | `gga init` |
 | `install` | Install git pre-commit hook in current repo | `gga install` |
 | `uninstall` | Remove git pre-commit hook from current repo | `gga uninstall` |
-| `run` | Run code review manually on staged files | `gga run` |
+| `run` | Run code review on staged files | `gga run` |
+| `run --no-cache` | Run review ignoring cache | `gga run --no-cache` |
 | `config` | Display current configuration and status | `gga config` |
+| `cache status` | Show cache status for current project | `gga cache status` |
+| `cache clear` | Clear cache for current project | `gga cache clear` |
+| `cache clear-all` | Clear all cached data | `gga cache clear-all` |
 | `help` | Show help message with all commands | `gga help` |
 | `version` | Show installed version | `gga version` |
 
@@ -298,14 +306,17 @@ $ gga uninstall
 ✅ Removed pre-commit hook
 ```
 
-#### `gga run`
+#### `gga run [--no-cache]`
 
-Manually runs code review on currently staged files. Useful for testing before committing.
+Runs code review on currently staged files. Uses intelligent caching by default to skip unchanged files.
 
 ```bash
 $ git add src/components/Button.tsx
 $ gga run
-# Reviews the staged file
+# Reviews the staged file (uses cache)
+
+$ gga run --no-cache
+# Forces review of all files, ignoring cache
 ```
 
 #### `gga config`
@@ -329,6 +340,83 @@ Values:
   STRICT_MODE:       true
 
 Rules File: Found
+```
+
+---
+
+## ⚡ Smart Caching
+
+GGA includes intelligent caching to speed up reviews by skipping files that haven't changed.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Cache Logic                               │
+├─────────────────────────────────────────────────────────────────┤
+│  1. Hash AGENTS.md + .gga config                                │
+│     └─► If changed → Invalidate ALL cache                       │
+│                                                                  │
+│  2. For each staged file:                                        │
+│     └─► Hash file content                                        │
+│         └─► If hash exists in cache with PASSED → Skip          │
+│         └─► If not cached → Send to AI for review               │
+│                                                                  │
+│  3. After PASSED review:                                         │
+│     └─► Store file hash in cache                                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Cache Invalidation
+
+The cache automatically invalidates when:
+
+| Change | Effect |
+|--------|--------|
+| File content changes | Only that file is re-reviewed |
+| `AGENTS.md` changes | **All files** are re-reviewed |
+| `.gga` config changes | **All files** are re-reviewed |
+
+### Cache Commands
+
+```bash
+# Check cache status
+$ gga cache status
+
+Cache Status:
+
+  Cache directory: ~/.cache/gga/a1b2c3d4...
+  Cache validity: Valid
+  Cached files: 12
+  Cache size: 4.0K
+
+# Clear project cache
+$ gga cache clear
+✅ Cleared cache for current project
+
+# Clear all cache (all projects)
+$ gga cache clear-all
+✅ Cleared all cache data
+```
+
+### Bypass Cache
+
+```bash
+# Force review all files, ignoring cache
+gga run --no-cache
+```
+
+### Cache Location
+
+```
+~/.cache/gga/
+├── <project-hash-1>/
+│   ├── metadata          # Hash of AGENTS.md + .gga
+│   └── files/
+│       ├── <file-hash-a> # "PASSED"
+│       └── <file-hash-b> # "PASSED"
+└── <project-hash-2>/
+    └── ...
 ```
 
 ---

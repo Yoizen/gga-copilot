@@ -9,12 +9,13 @@
 
 set -e
 
-VERSION="2.0.1"
+VERSION="2.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="$(dirname "$SCRIPT_DIR")/lib"
 
-# Source provider functions
+# Source library functions
 source "$LIB_DIR/providers.sh"
+source "$LIB_DIR/cache.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -49,13 +50,19 @@ print_help() {
   echo "  gga <command> [options]"
   echo ""
   echo -e "${BOLD}COMMANDS:${NC}"
-  echo "  run           Run code review on staged files"
-  echo "  install       Install git pre-commit hook in current repo"
-  echo "  uninstall     Remove git pre-commit hook from current repo"
-  echo "  config        Show current configuration"
-  echo "  init          Create a sample .gga config file"
-  echo "  help          Show this help message"
-  echo "  version       Show version"
+  echo "  run [--no-cache]  Run code review on staged files"
+  echo "  install           Install git pre-commit hook in current repo"
+  echo "  uninstall         Remove git pre-commit hook from current repo"
+  echo "  config            Show current configuration"
+  echo "  init              Create a sample .gga config file"
+  echo "  cache clear       Clear cache for current project"
+  echo "  cache clear-all   Clear all cached data"
+  echo "  cache status      Show cache status"
+  echo "  help              Show this help message"
+  echo "  version           Show version"
+  echo ""
+  echo -e "${BOLD}RUN OPTIONS:${NC}"
+  echo "  --no-cache        Force review all files, ignoring cache"
   echo ""
   echo -e "${BOLD}CONFIGURATION:${NC}"
   echo "  Create a ${CYAN}.gga${NC} file in your project root or"
@@ -74,7 +81,9 @@ print_help() {
   echo -e "${BOLD}EXAMPLES:${NC}"
   echo "  gga init          # Create sample config"
   echo "  gga install       # Install git hook"
-  echo "  gga run           # Run review manually"
+  echo "  gga run           # Run review (with cache)"
+  echo "  gga run --no-cache # Run review (ignore cache)"
+  echo "  gga cache status  # Show cache info"
   echo ""
   echo -e "${BOLD}ENVIRONMENT VARIABLES:${NC}"
   echo "  GGA_PROVIDER      Override provider from config"
@@ -343,7 +352,86 @@ cmd_uninstall() {
   echo ""
 }
 
+cmd_cache() {
+  local subcommand="${1:-status}"
+  
+  print_banner
+  
+  case "$subcommand" in
+    clear)
+      clear_project_cache
+      log_success "Cleared cache for current project"
+      echo ""
+      ;;
+    clear-all)
+      clear_all_cache
+      log_success "Cleared all cache data"
+      echo ""
+      ;;
+    status)
+      load_config
+      
+      local cache_dir
+      cache_dir=$(get_project_cache_dir)
+      
+      echo -e "${BOLD}Cache Status:${NC}"
+      echo ""
+      
+      if [[ -z "$cache_dir" ]]; then
+        echo -e "  Project cache: ${YELLOW}Not initialized (not in a git repo?)${NC}"
+      elif [[ ! -d "$cache_dir" ]]; then
+        echo -e "  Project cache: ${YELLOW}Not initialized${NC}"
+      else
+        echo -e "  Cache directory: ${CYAN}$cache_dir${NC}"
+        
+        # Check if cache is valid
+        if is_cache_valid "$RULES_FILE" ".gga"; then
+          echo -e "  Cache validity: ${GREEN}Valid${NC}"
+        else
+          echo -e "  Cache validity: ${YELLOW}Invalid (rules or config changed)${NC}"
+        fi
+        
+        # Count cached files
+        local cached_count=0
+        if [[ -d "$cache_dir/files" ]]; then
+          cached_count=$(find "$cache_dir/files" -type f 2>/dev/null | wc -l | xargs)
+        fi
+        echo -e "  Cached files: ${CYAN}$cached_count${NC}"
+        
+        # Show cache size
+        if command -v du &> /dev/null; then
+          local cache_size
+          cache_size=$(du -sh "$cache_dir" 2>/dev/null | cut -f1)
+          echo -e "  Cache size: ${CYAN}$cache_size${NC}"
+        fi
+      fi
+      echo ""
+      ;;
+    *)
+      log_error "Unknown cache command: $subcommand"
+      echo ""
+      echo "Available commands:"
+      echo "  gga cache status     - Show cache status"
+      echo "  gga cache clear      - Clear project cache"
+      echo "  gga cache clear-all  - Clear all cache"
+      echo ""
+      exit 1
+      ;;
+  esac
+}
+
 cmd_run() {
+  local use_cache=true
+  
+  # Parse arguments
+  for arg in "$@"; do
+    case "$arg" in
+      --no-cache)
+        use_cache=false
+        ;;
+    esac
+  done
+  
   print_banner
   load_config
 
@@ -389,6 +477,13 @@ cmd_run() {
   if [[ -n "$EXCLUDE_PATTERNS" ]]; then
     log_info "Exclude patterns: $EXCLUDE_PATTERNS"
   fi
+  
+  # Cache status
+  if [[ "$use_cache" == true ]]; then
+    log_info "Cache: ${GREEN}enabled${NC}"
+  else
+    log_info "Cache: ${YELLOW}disabled (--no-cache)${NC}"
+  fi
   echo ""
 
   # Get staged files
@@ -400,17 +495,65 @@ cmd_run() {
     exit 0
   fi
 
+  # Initialize/validate cache
+  local files_to_review="$STAGED_FILES"
+  local cached_files=""
+  local cache_initialized=false
+  
+  if [[ "$use_cache" == true ]]; then
+    # Check if cache is valid, if not invalidate it
+    if ! is_cache_valid "$RULES_FILE" ".gga"; then
+      log_info "Cache invalidated (rules or config changed)"
+      invalidate_cache
+    fi
+    
+    # Initialize cache
+    init_cache "$RULES_FILE" ".gga" > /dev/null
+    cache_initialized=true
+    
+    # Filter out cached files
+    files_to_review=$(filter_uncached_files "$STAGED_FILES")
+    
+    # Calculate cached files
+    local total_count=0
+    local uncached_count=0
+    
+    while IFS= read -r file; do
+      [[ -n "$file" ]] && ((total_count++))
+    done <<< "$STAGED_FILES"
+    
+    while IFS= read -r file; do
+      [[ -n "$file" ]] && ((uncached_count++))
+    done <<< "$files_to_review"
+    
+    local cached_count=$((total_count - uncached_count))
+    
+    if [[ $cached_count -gt 0 ]]; then
+      log_success "$cached_count file(s) passed from cache"
+    fi
+  fi
+
   echo -e "${BOLD}Files to review:${NC}"
-  echo "$STAGED_FILES" | while IFS= read -r file; do
-    echo "  - $file"
+  if [[ -z "$files_to_review" ]]; then
+    echo -e "  ${GREEN}All files passed from cache!${NC}"
+    echo ""
+    log_success "CODE REVIEW PASSED (cached)"
+    echo ""
+    exit 0
+  fi
+  
+  echo "$files_to_review" | while IFS= read -r file; do
+    if [[ -n "$file" ]]; then
+      echo "  - $file"
+    fi
   done
   echo ""
 
   # Read rules
   RULES=$(cat "$RULES_FILE")
 
-  # Build prompt
-  PROMPT=$(build_prompt "$RULES" "$STAGED_FILES")
+  # Build prompt only with files to review
+  PROMPT=$(build_prompt "$RULES" "$files_to_review")
 
   # Execute review
   log_info "Sending to $PROVIDER for review..."
@@ -432,6 +575,10 @@ cmd_run() {
 
   # Parse result
   if echo "$RESULT" | grep -q "^STATUS: PASSED"; then
+    # Cache the passed files
+    if [[ "$cache_initialized" == true ]]; then
+      cache_files_passed "$files_to_review"
+    fi
     log_success "CODE REVIEW PASSED"
     echo ""
     exit 0
@@ -559,7 +706,8 @@ EOF
 main() {
   case "${1:-}" in
     run)
-      cmd_run
+      shift
+      cmd_run "$@"
       ;;
     install)
       cmd_install
@@ -572,6 +720,10 @@ main() {
       ;;
     init)
       cmd_init
+      ;;
+    cache)
+      shift
+      cmd_cache "$@"
       ;;
     version|--version|-v)
       print_version
