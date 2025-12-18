@@ -8,6 +8,7 @@
 # - gemini: Google Gemini CLI
 # - codex: OpenAI Codex CLI
 # - ollama:<model>: Ollama with specified model
+# - copilot[:<model>]: GitHub Copilot via copilot-api proxy (default model: gpt-4o)
 # ============================================================================
 
 # Colors (in case sourced independently)
@@ -80,6 +81,15 @@ validate_provider() {
         return 1
       fi
       ;;
+    copilot)
+      if ! command -v curl &> /dev/null; then
+        echo -e "${RED}❌ curl not found${NC}"
+        echo ""
+        echo "Install curl to use Copilot provider."
+        echo ""
+        return 1
+      fi
+      ;;
     *)
       echo -e "${RED}❌ Unknown provider: $provider${NC}"
       echo ""
@@ -88,6 +98,7 @@ validate_provider() {
       echo "  - gemini"
       echo "  - codex"
       echo "  - ollama:<model>"
+      echo "  - copilot"
       echo ""
       return 1
       ;;
@@ -118,6 +129,13 @@ execute_provider() {
     ollama)
       local model="${provider#*:}"
       execute_ollama "$model" "$prompt"
+      ;;
+    copilot)
+      local model="${provider#*:}"
+      if [[ "$model" == "$provider" ]]; then
+        model="gpt-4o" # Default model
+      fi
+      execute_copilot "$model" "$prompt"
       ;;
   esac
 }
@@ -160,6 +178,52 @@ execute_ollama() {
   return $?
 }
 
+execute_copilot() {
+  local model="$1"
+  local prompt="$2"
+  
+  # Escape double quotes and backslashes in the prompt for JSON
+  # This is a basic escaping, might need more robust handling for complex chars if strict JSON is required
+  local escaped_prompt
+  escaped_prompt=$(echo "$prompt" | sed 's/\\/\\\\/g; s/"/\\"/g; s/$/\\n/g' | tr -d '\n')
+  
+  # Remove the last \n added by the loop above (optional, but cleaner)
+  escaped_prompt=${escaped_prompt%\\n}
+
+  # Call the local copilot-api proxy
+  # Assuming default port 4141
+  local response
+  response=$(curl -s -X POST http://localhost:4141/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"model\": \"$model\",
+      \"messages\": [{\"role\": \"user\", \"content\": \"$escaped_prompt\"}]
+    }")
+
+  if [ $? -ne 0 ]; then
+    echo "Error connecting to copilot-api. Is it running on port 4141?" >&2
+    return 1
+  fi
+
+  # Extract content from JSON response using sed (zero dependency)
+  # Strategy:
+  # 1. Replace escaped quotes \" with a placeholder (control char \x01)
+  # 2. Extract string between "content": " and the next "
+  # 3. Restore escaped quotes
+  # 4. Unescape newlines and backslashes
+  
+  local content
+  content=$(echo "$response" | \
+    sed 's/\\"/\x01/g' | \
+    sed -n 's/.*"content": *"\([^"]*\)".*/\1/p' | \
+    sed 's/\x01/\\"/g' | \
+    sed 's/\\n/\n/g; s/\\\\/\\/g')
+  
+  echo "$content"
+  
+  return 0
+}
+
 # ============================================================================
 # Provider Info
 # ============================================================================
@@ -181,6 +245,13 @@ get_provider_info() {
     ollama)
       local model="${provider#*:}"
       echo "Ollama (model: $model)"
+      ;;
+    copilot)
+      local model="${provider#*:}"
+      if [[ "$model" == "$provider" ]]; then
+        model="gpt-4o"
+      fi
+      echo "GitHub Copilot (model: $model)"
       ;;
     *)
       echo "Unknown provider"

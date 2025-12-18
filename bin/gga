@@ -9,9 +9,17 @@
 
 set -e
 
-VERSION="2.2.1"
+VERSION="2.2.x"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_DIR="$(dirname "$SCRIPT_DIR")/lib"
+
+# Resolve LIB_DIR dynamically
+if [[ -d "$(dirname "$SCRIPT_DIR")/lib" ]]; then
+  # Development mode: lib is relative to bin
+  LIB_DIR="$(dirname "$SCRIPT_DIR")/lib"
+else
+  # Installed mode: lib is in ~/.local/share/gga/lib
+  LIB_DIR="$HOME/.local/share/gga/lib"
+fi
 
 # Source library functions
 source "$LIB_DIR/providers.sh"
@@ -115,6 +123,10 @@ log_error() {
 # ============================================================================
 
 load_config() {
+  # Save environment variables to override later
+  local env_gga_provider="$GGA_PROVIDER"
+  local env_provider="$PROVIDER"
+
   # Reset to defaults
   PROVIDER=""
   FILE_PATTERNS="$DEFAULT_FILE_PATTERNS"
@@ -135,8 +147,10 @@ load_config() {
   fi
 
   # Environment variable overrides everything
-  if [[ -n "$GGA_PROVIDER" ]]; then
-    PROVIDER="$GGA_PROVIDER"
+  if [[ -n "$env_gga_provider" ]]; then
+    PROVIDER="$env_gga_provider"
+  elif [[ -n "$env_provider" ]]; then
+    PROVIDER="$env_provider"
   fi
 }
 

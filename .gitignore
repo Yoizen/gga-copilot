@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+copilot-api/
+
+# System
+.DS_Store
+
+# GGA
+.gga
