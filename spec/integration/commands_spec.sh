@@ -217,7 +217,7 @@ Describe 'gga commands'
       TEMP_DIR=$(mktemp -d)
       cd "$TEMP_DIR"
       git init --quiet
-      echo "rules" > AGENTS.md
+      echo "rules" > REVIEW.md
       echo 'PROVIDER="claude"' > .gga
     }
 

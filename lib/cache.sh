@@ -6,7 +6,7 @@
 # Intelligent caching to avoid re-reviewing unchanged files.
 # Cache invalidates when:
 #   - File content changes (hash)
-#   - Rules file (AGENTS.md) changes
+#   - Rules file (REVIEW.md) changes
 #   - Config file (.gga) changes
 # ============================================================================
 

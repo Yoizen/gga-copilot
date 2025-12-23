@@ -1,6 +1,6 @@
 # GGA + GitHub Copilot
 
-Guía rápida para usar GitHub Copilot como proveedor de AI en Gentleman Guardian Angel. (Usando https://github.com/ericc-ch/copilot-api)
+Guía rápida para usar GitHub Copilot como proveedor de AI en Gentleman Guardian Angel. (Usando https://github.com/Yoizen/copilot-api)
 
 ## 1. Configuración Inicial
 Primero, instala el servidor proxy (solo una vez):

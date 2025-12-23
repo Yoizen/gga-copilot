@@ -46,14 +46,14 @@ create_test_config() {
 PROVIDER="mock"
 FILE_PATTERNS="*.ts,*.tsx,*.js"
 EXCLUDE_PATTERNS="*.test.ts"
-RULES_FILE="AGENTS.md"
+RULES_FILE="REVIEW.md"
 STRICT_MODE="true"
 EOF
 }
 
-# Create a minimal AGENTS.md
+# Create a minimal REVIEW.md
 create_test_rules() {
-  cat > AGENTS.md << 'EOF'
+  cat > REVIEW.md << 'EOF'
 # Test Rules
 - No console.log
 - Use const over let

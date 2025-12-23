@@ -10,7 +10,7 @@ set -e
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COPILOT_DIR="$HOME/.local/share/gga/copilot-api"
-REPO_URL="https://github.com/ericc-ch/copilot-api.git"
+REPO_URL="https://github.com/Yoizen/copilot-api.git"
 
 # Colors
 GREEN='\033[0;32m'

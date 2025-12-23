@@ -93,7 +93,7 @@ Describe 'cache.sh'
   Describe 'get_metadata_hash()'
     setup() {
       TEMP_DIR=$(mktemp -d)
-      echo "rules content" > "$TEMP_DIR/AGENTS.md"
+      echo "rules content" > "$TEMP_DIR/REVIEW.md"
       echo "config content" > "$TEMP_DIR/.gga"
     }
 
@@ -105,22 +105,22 @@ Describe 'cache.sh'
     AfterEach 'cleanup'
 
     It 'returns a hash combining rules and config'
-      When call get_metadata_hash "$TEMP_DIR/AGENTS.md" "$TEMP_DIR/.gga"
+      When call get_metadata_hash "$TEMP_DIR/REVIEW.md" "$TEMP_DIR/.gga"
       The status should be success
       The length of output should eq 64
     End
 
     It 'changes when rules file changes'
-      hash1=$(get_metadata_hash "$TEMP_DIR/AGENTS.md" "$TEMP_DIR/.gga")
-      echo "new rules" > "$TEMP_DIR/AGENTS.md"
-      hash2=$(get_metadata_hash "$TEMP_DIR/AGENTS.md" "$TEMP_DIR/.gga")
+      hash1=$(get_metadata_hash "$TEMP_DIR/REVIEW.md" "$TEMP_DIR/.gga")
+      echo "new rules" > "$TEMP_DIR/REVIEW.md"
+      hash2=$(get_metadata_hash "$TEMP_DIR/REVIEW.md" "$TEMP_DIR/.gga")
       The value "$hash1" should not eq "$hash2"
     End
 
     It 'changes when config file changes'
-      hash1=$(get_metadata_hash "$TEMP_DIR/AGENTS.md" "$TEMP_DIR/.gga")
+      hash1=$(get_metadata_hash "$TEMP_DIR/REVIEW.md" "$TEMP_DIR/.gga")
       echo "new config" > "$TEMP_DIR/.gga"
-      hash2=$(get_metadata_hash "$TEMP_DIR/AGENTS.md" "$TEMP_DIR/.gga")
+      hash2=$(get_metadata_hash "$TEMP_DIR/REVIEW.md" "$TEMP_DIR/.gga")
       The value "$hash1" should not eq "$hash2"
     End
   End
@@ -130,7 +130,7 @@ Describe 'cache.sh'
       TEMP_DIR=$(mktemp -d)
       cd "$TEMP_DIR"
       git init --quiet
-      echo "rules" > AGENTS.md
+      echo "rules" > REVIEW.md
       echo "config" > .gga
       # Override cache dir for testing
       export CACHE_DIR="$TEMP_DIR/.cache/gga"
@@ -145,20 +145,20 @@ Describe 'cache.sh'
     AfterEach 'cleanup'
 
     It 'creates cache directory structure'
-      When call init_cache "AGENTS.md" ".gga"
+      When call init_cache "REVIEW.md" ".gga"
       The status should be success
       The output should be present
       The path "$CACHE_DIR" should be directory
     End
 
     It 'creates metadata file'
-      init_cache "AGENTS.md" ".gga" > /dev/null
+      init_cache "REVIEW.md" ".gga" > /dev/null
       cache_dir=$(get_project_cache_dir)
       The path "$cache_dir/metadata" should be file
     End
 
     It 'creates files subdirectory'
-      init_cache "AGENTS.md" ".gga" > /dev/null
+      init_cache "REVIEW.md" ".gga" > /dev/null
       cache_dir=$(get_project_cache_dir)
       The path "$cache_dir/files" should be directory
     End
@@ -169,10 +169,10 @@ Describe 'cache.sh'
       TEMP_DIR=$(mktemp -d)
       cd "$TEMP_DIR"
       git init --quiet
-      echo "rules" > AGENTS.md
+      echo "rules" > REVIEW.md
       echo "config" > .gga
       export CACHE_DIR="$TEMP_DIR/.cache/gga"
-      init_cache "AGENTS.md" ".gga" > /dev/null
+      init_cache "REVIEW.md" ".gga" > /dev/null
     }
 
     cleanup() {
@@ -184,19 +184,19 @@ Describe 'cache.sh'
     AfterEach 'cleanup'
 
     It 'returns success when cache is valid'
-      When call is_cache_valid "AGENTS.md" ".gga"
+      When call is_cache_valid "REVIEW.md" ".gga"
       The status should be success
     End
 
     It 'returns failure when rules change'
-      echo "new rules" > AGENTS.md
-      When call is_cache_valid "AGENTS.md" ".gga"
+      echo "new rules" > REVIEW.md
+      When call is_cache_valid "REVIEW.md" ".gga"
       The status should be failure
     End
 
     It 'returns failure when config changes'
       echo "new config" > .gga
-      When call is_cache_valid "AGENTS.md" ".gga"
+      When call is_cache_valid "REVIEW.md" ".gga"
       The status should be failure
     End
   End
@@ -206,11 +206,11 @@ Describe 'cache.sh'
       TEMP_DIR=$(mktemp -d)
       cd "$TEMP_DIR"
       git init --quiet
-      echo "rules" > AGENTS.md
+      echo "rules" > REVIEW.md
       echo "config" > .gga
       echo "file content" > test.ts
       export CACHE_DIR="$TEMP_DIR/.cache/gga"
-      init_cache "AGENTS.md" ".gga" > /dev/null
+      init_cache "REVIEW.md" ".gga" > /dev/null
     }
 
     cleanup() {
@@ -250,13 +250,13 @@ Describe 'cache.sh'
       TEMP_DIR=$(mktemp -d)
       cd "$TEMP_DIR"
       git init --quiet
-      echo "rules" > AGENTS.md
+      echo "rules" > REVIEW.md
       echo "config" > .gga
       echo "content1" > file1.ts
       echo "content2" > file2.ts
       echo "content3" > file3.ts
       export CACHE_DIR="$TEMP_DIR/.cache/gga"
-      init_cache "AGENTS.md" ".gga" > /dev/null
+      init_cache "REVIEW.md" ".gga" > /dev/null
     }
 
     cleanup() {
@@ -300,10 +300,10 @@ Describe 'cache.sh'
       TEMP_DIR=$(mktemp -d)
       cd "$TEMP_DIR"
       git init --quiet
-      echo "rules" > AGENTS.md
+      echo "rules" > REVIEW.md
       echo "config" > .gga
       export CACHE_DIR="$TEMP_DIR/.cache/gga"
-      init_cache "AGENTS.md" ".gga" > /dev/null
+      init_cache "REVIEW.md" ".gga" > /dev/null
     }
 
     cleanup() {

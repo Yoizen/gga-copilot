@@ -36,7 +36,8 @@ NC='\033[0m' # No Color
 
 # Defaults
 DEFAULT_FILE_PATTERNS="*"
-DEFAULT_RULES_FILE="AGENTS.md"
+DEFAULT_PROVIDER="copilot:claude-haiku-4.5"
+DEFAULT_RULES_FILE="REVIEW.md"
 DEFAULT_STRICT_MODE="true"
 
 # ============================================================================
@@ -77,13 +78,13 @@ print_help() {
   echo "  ${CYAN}~/.config/gga/config${NC} for global settings."
   echo ""
   echo -e "${BOLD}CONFIG OPTIONS:${NC}"
-  echo "  PROVIDER           AI provider to use (required)"
-  echo "                     Values: claude, gemini, codex, ollama:<model>"
+  echo "  PROVIDER           AI provider to use (default: copilot:claude-haiku-4.5)"
+  echo "                     Values: claude, gemini, codex, ollama:<model>, copilot:<model>"
   echo "  FILE_PATTERNS      File patterns to review (default: *)"
   echo "                     Example: *.ts,*.tsx,*.js,*.jsx"
   echo "  EXCLUDE_PATTERNS   Patterns to exclude from review"
   echo "                     Example: *.test.ts,*.spec.ts,*.d.ts"
-  echo "  RULES_FILE         File containing review rules (default: AGENTS.md)"
+  echo "  RULES_FILE         File containing review rules (default: REVIEW.md)"
   echo "  STRICT_MODE        Fail on ambiguous AI response (default: true)"
   echo ""
   echo -e "${BOLD}EXAMPLES:${NC}"
@@ -128,7 +129,7 @@ load_config() {
   local env_provider="$PROVIDER"
 
   # Reset to defaults
-  PROVIDER=""
+  PROVIDER="$DEFAULT_PROVIDER"
   FILE_PATTERNS="$DEFAULT_FILE_PATTERNS"
   EXCLUDE_PATTERNS=""
   RULES_FILE="$DEFAULT_RULES_FILE"
@@ -227,14 +228,16 @@ cmd_init() {
 # https://github.com/your-org/gga
 
 # AI Provider (required)
-# Options: claude, gemini, codex, ollama:<model>
+# Options: claude, gemini, codex, ollama:<model>, copilot:<model>
 # Examples:
 #   PROVIDER="claude"
 #   PROVIDER="gemini"
 #   PROVIDER="codex"
+#   PROVIDER="copilot:claude-haiku-4.5"
+#   PROVIDER="copilot:gpt-4o"
 #   PROVIDER="ollama:llama3.2"
 #   PROVIDER="ollama:codellama"
-PROVIDER="claude"
+PROVIDER="copilot:claude-haiku-4.5"
 
 # File patterns to include in review (comma-separated)
 # Default: * (all files)
@@ -252,8 +255,8 @@ FILE_PATTERNS="*.ts,*.tsx,*.js,*.jsx"
 EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts"
 
 # File containing code review rules
-# Default: AGENTS.md
-RULES_FILE="AGENTS.md"
+# Default: REVIEW.md
+RULES_FILE="REVIEW.md"
 
 # Strict mode: fail if AI response is ambiguous
 # Default: true
