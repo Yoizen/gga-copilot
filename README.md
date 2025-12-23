@@ -1,6 +1,6 @@
 # 🤖 Gentleman Guardian Angel
 
-**Provider-agnostic AI code review** — Enforce coding standards on every commit using Claude, Gemini, Codex, Ollama, or any LLM. Zero dependencies, pure Bash.
+**Provider-agnostic AI code review** — Enforce coding standards on every commit using Claude, Gemini, Codex, Ollama, or any LLM. **Pure Bash** (Linux/Mac) or **PowerShell** (Windows).
 
 ![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -13,16 +13,28 @@ Automate code review enforcement on every commit. Validate staged files against 
 
 ## Installation
 
-### Homebrew
+### macOS/Linux - Homebrew
 ```bash
 brew tap gentleman-programming/tap
 brew install gga
 ```
 
-### Manual
+### macOS/Linux - Manual
 ```bash
 git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
 cd gga && ./install.sh
+```
+
+### Windows - PowerShell
+```powershell
+git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
+cd gga
+PowerShell.exe -ExecutionPolicy Bypass -File install.ps1
+```
+
+**Note:** Windows requires PowerShell 5.0+. If execution is restricted:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 ## Quick Start
