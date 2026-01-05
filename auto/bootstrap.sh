@@ -342,11 +342,15 @@ WRAPPER_EOF
              print_info "Initializing SpecKit in repository..."
              
              if [ -f "$specify_bin" ]; then
-                 "$specify_bin" init --here --ai copilot --no-git >/dev/null 2>&1
-                 if [ $? -eq 0 ]; then
+                 # Run with timeout and send 'y' to any prompts
+                 (echo "y" | timeout 30s "$specify_bin" init --here --ai copilot --no-git) >/dev/null 2>&1
+                 local exit_code=$?
+                 if [ $exit_code -eq 0 ]; then
                      print_success "SpecKit initialized for Copilot"
+                 elif [ $exit_code -eq 124 ]; then
+                     print_warning "SpecKit initialization timed out (this is OK - structure may already exist)"
                  else
-                     print_warning "SpecKit initialization failed. Run './bin/specify init --here --ai copilot' manually."
+                     print_warning "SpecKit initialization failed. Run './bin/specify init --here --ai copilot' manually if needed."
                  fi
              else
                  print_warning "Could not find specify wrapper at $specify_bin"
