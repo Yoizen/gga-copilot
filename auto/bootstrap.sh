@@ -447,10 +447,17 @@ EOF
             
             local source="$script_dir/$source_file"
             local target="$repo_path/$target_relative"
-             if [ -f "$source" ]; then
-                 cp "$source" "$target"
-                 print_success "Copied $source_file → $target_relative"
-             fi
+            
+            # Skip if source and target are the same file
+            if [ "$source" -ef "$target" ]; then
+                print_info "$target_relative already in place (same file)"
+                continue
+            fi
+            
+            if [ -f "$source" ]; then
+                cp "$source" "$target"
+                print_success "Copied $source_file → $target_relative"
+            fi
          done
     fi
 }
