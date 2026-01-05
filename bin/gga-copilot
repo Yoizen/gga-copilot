@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# Gentleman Guardian Angel - Copilot API Manager
+# Guardian Agent - Copilot API Manager
 # ============================================================================
 # Helper script to install and run the copilot-api proxy.
 # ============================================================================

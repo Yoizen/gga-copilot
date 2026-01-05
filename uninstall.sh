@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# Gentleman Guardian Angel - Uninstaller
+# Guardian Agent - Uninstaller
 # ============================================================================
 # Removes the gga CLI tool from your system
 # ============================================================================
@@ -18,7 +18,7 @@ NC='\033[0m'
 
 echo ""
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${CYAN}${BOLD}  Gentleman Guardian Angel - Uninstaller${NC}"
+echo -e "${CYAN}${BOLD}  Guardian Agent - Uninstaller${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 

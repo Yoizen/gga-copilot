@@ -1,7 +1,7 @@
-#!/usr/bin/env powershell
+﻿#!/usr/bin/env powershell
 
 # ============================================================================
-# Gentleman Guardian Angel - Windows Installation Script
+# Guardian Agent - Windows Installation Script
 # ============================================================================
 
 param(
@@ -16,7 +16,7 @@ $LIB_DIR = "$SCRIPT_DIR\lib"
 function Print-Banner {
     Write-Host ""
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
-    Write-Host "  Gentleman Guardian Angel - Windows Installation" -ForegroundColor Cyan
+    Write-Host "  Guardian Agent - Windows Installation" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host ""
 }

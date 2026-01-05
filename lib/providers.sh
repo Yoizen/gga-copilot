@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# Gentleman Guardian Angel - Provider Functions
+# Guardian Agent - Provider Functions
 # ============================================================================
 # Handles execution for different AI providers:
 # - claude: Anthropic Claude Code CLI

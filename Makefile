@@ -2,7 +2,7 @@
 
 # Default target
 help:
-	@echo "Gentleman Guardian Angel - Development Commands"
+	@echo "Guardian Agent - Development Commands"
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""

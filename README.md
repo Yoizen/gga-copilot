@@ -1,4 +1,4 @@
-# 🤖 Gentleman Guardian Angel
+# 🤖 Guardian Angel
 
 **Provider-agnostic AI code review** — Enforce coding standards on every commit using Claude, Gemini, Codex, Ollama, or any LLM. **Pure Bash** (Linux/Mac) or **PowerShell** (Windows).
 
@@ -13,19 +13,52 @@ Automate code review enforcement on every commit. Validate staged files against 
 
 ## Installation
 
-### macOS/Linux - Homebrew
+### 🚀 Quick Setup (Recommended)
+
+**Automated setup with GGA + SpecKit + Copilot API for any repository:**
+
+#### Windows (PowerShell)
+```powershell
+# Setup current repository
+git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
+cd gga\auto
+.\bootstrap.ps1
+```
+
+#### macOS/Linux (Bash)
+```bash
+# Setup current repository
+git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
+cd gga/auto
+./bootstrap.sh
+```
+
+This will automatically:
+- ✅ Install GGA, SpecKit, and Copilot API
+- ✅ Configure your repository with coding standards
+- ✅ Install VS Code extensions
+- ✅ Create specs/ directory structure
+- ✅ Set up pre-commit hooks
+
+**See [auto/README.md](auto/README.md) for advanced options.**
+
+---
+
+### Manual Installation
+
+#### macOS/Linux - Homebrew
 ```bash
 brew tap gentleman-programming/tap
 brew install gga
 ```
 
-### macOS/Linux - Manual
+#### macOS/Linux - Manual
 ```bash
 git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
 cd gga && ./install.sh
 ```
 
-### Windows - PowerShell
+#### Windows - PowerShell
 ```powershell
 git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
 cd gga
@@ -167,7 +200,7 @@ repos:
   - repo: local
     hooks:
       - id: gga
-        name: Gentleman Guardian Angel
+        name: Guardian Agent
         entry: gga run
         language: system
         pass_filenames: false

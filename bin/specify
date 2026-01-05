@@ -1,0 +1,10 @@
+#!/bin/bash
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SPECIFY_EXE="$PROJECT_ROOT/.spec-kit-env/bin/specify"
+
+if [ -f "$SPECIFY_EXE" ]; then
+    "$SPECIFY_EXE" "$@"
+else
+    echo "SpecKit not found at $SPECIFY_EXE. Run auto/bootstrap.sh to install."
+    exit 1
+fi

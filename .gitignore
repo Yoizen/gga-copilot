@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 copilot-api/
+.spec-kit-env/
 
 # System
 .DS_Store

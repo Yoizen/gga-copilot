@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# Gentleman Guardian Angel - Cache Functions
+# Guardian Agent - Cache Functions
 # ============================================================================
 # Intelligent caching to avoid re-reviewing unchanged files.
 # Cache invalidates when:

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================================
-# Gentleman Guardian Angel - Provider-agnostic code review using AI
+# Guardian Agent - Provider-agnostic code review using AI
 # ============================================================================
 # A standalone CLI tool that validates staged files against your project's
 # coding standards using any AI provider (Claude, Gemini, Codex, Ollama, etc.)
@@ -47,7 +47,7 @@ DEFAULT_STRICT_MODE="true"
 print_banner() {
   echo ""
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${CYAN}${BOLD}  Gentleman Guardian Angel v${VERSION}${NC}"
+  echo -e "${CYAN}${BOLD}  Guardian Agent v${VERSION}${NC}"
   echo -e "${CYAN}  Provider-agnostic code review using AI${NC}"
   echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo ""
@@ -224,7 +224,7 @@ cmd_init() {
   fi
 
   cat > "$PROJECT_CONFIG" << 'EOF'
-# Gentleman Guardian Angel Configuration
+# Guardian Agent Configuration
 # https://github.com/your-org/gga
 
 # AI Provider (required)
@@ -291,30 +291,30 @@ cmd_install() {
       log_warning "Found legacy 'ai-code-review' in hook, migrating to 'gga'..."
       if [[ "$(uname)" == "Darwin" ]]; then
         sed -i '' 's/ai-code-review/gga/g' "$HOOK_PATH"
-        sed -i '' 's/AI Code Review/Gentleman Guardian Angel/g' "$HOOK_PATH"
+        sed -i '' 's/AI Code Review/Guardian Agent/g' "$HOOK_PATH"
       else
         sed -i 's/ai-code-review/gga/g' "$HOOK_PATH"
-        sed -i 's/AI Code Review/Gentleman Guardian Angel/g' "$HOOK_PATH"
+        sed -i 's/AI Code Review/Guardian Agent/g' "$HOOK_PATH"
       fi
       log_success "Migrated hook to use 'gga'"
       exit 0
     fi
 
     if grep -q "gga" "$HOOK_PATH"; then
-      log_warning "Gentleman Guardian Angel hook already installed"
+      log_warning "Guardian Agent hook already installed"
       exit 0
     else
       log_warning "A pre-commit hook already exists"
-      read -p "Append Gentleman Guardian Angel to existing hook? (y/N): " confirm
+      read -p "Append Guardian Agent to existing hook? (y/N): " confirm
       if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
         echo "Aborted."
         exit 0
       fi
       # Append to existing hook
       echo "" >> "$HOOK_PATH"
-      echo "# Gentleman Guardian Angel" >> "$HOOK_PATH"
+      echo "# Guardian Agent" >> "$HOOK_PATH"
       echo 'gga run || exit 1' >> "$HOOK_PATH"
-      log_success "Appended Gentleman Guardian Angel to existing hook"
+      log_success "Appended Guardian Agent to existing hook"
       exit 0
     fi
   fi
@@ -322,7 +322,7 @@ cmd_install() {
   # Create new hook
   cat > "$HOOK_PATH" << 'EOF'
 #!/usr/bin/env bash
-# Git pre-commit hook - Gentleman Guardian Angel
+# Git pre-commit hook - Guardian Agent
 
 gga run || exit 1
 EOF
@@ -350,7 +350,7 @@ cmd_uninstall() {
   fi
 
   if ! grep -q "gga" "$HOOK_PATH"; then
-    log_warning "Gentleman Guardian Angel hook not found in pre-commit"
+    log_warning "Guardian Agent hook not found in pre-commit"
     exit 0
   fi
 
@@ -361,10 +361,10 @@ cmd_uninstall() {
     log_success "Removed pre-commit hook"
   else
     # Mixed hook, just remove our lines
-    sed -i.bak '/# Gentleman Guardian Angel/d' "$HOOK_PATH"
+    sed -i.bak '/# Guardian Agent/d' "$HOOK_PATH"
     sed -i.bak '/gga run/d' "$HOOK_PATH"
     rm -f "$HOOK_PATH.bak"
-    log_success "Removed Gentleman Guardian Angel from pre-commit hook"
+    log_success "Removed Guardian Agent from pre-commit hook"
   fi
   echo ""
 }
