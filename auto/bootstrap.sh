@@ -360,6 +360,7 @@ WRAPPER_EOF
         # Copy configuration files
         # Override REVIEW.md source if using OpenSpec (though we are in the else block here, keeping logic generic if needed)
         local review_source="REVIEW.md"
+        local base_url="https://raw.githubusercontent.com/Yoizen/gga-copilot/main/auto"
         
         # Always copy configuration files (overwrite if exists)
         for file_key in "AGENTS.MD" "REVIEW.md" "CONSTITUTION.md"; do
@@ -387,7 +388,14 @@ WRAPPER_EOF
                 cp "$source" "$target"
                 print_success "Copied $source_file → $target_relative"
             else
-                print_warning "$source_file not found in auto/ directory"
+                # Try to download from GitHub if local file not found
+                print_info "Downloading $source_file from GitHub..."
+                mkdir -p "$(dirname "$target")"
+                if curl -fsSL "$base_url/$source_file" -o "$target" 2>/dev/null; then
+                    print_success "Downloaded $source_file → $target_relative"
+                else
+                    print_warning "Could not download $source_file from GitHub"
+                fi
             fi
         done
         
@@ -440,6 +448,8 @@ EOF
     # Always copy REVIEW.md and AGENTS.MD for OpenSpec (overwrite if exists)
     if [ "$USE_OPENSPEC" = true ]; then
          local review_source="REVIEW_OPENSPEC.md"
+         local base_url="https://raw.githubusercontent.com/Yoizen/gga-copilot/main/auto"
+         
          for file_key in "AGENTS.MD" "REVIEW.md"; do
             local source_file="$file_key"
             local target_relative=""
@@ -461,6 +471,14 @@ EOF
             if [ -f "$source" ]; then
                 cp "$source" "$target"
                 print_success "Copied $source_file → $target_relative"
+            else
+                # Try to download from GitHub if local file not found
+                print_info "Downloading $source_file from GitHub..."
+                if curl -fsSL "$base_url/$source_file" -o "$target" 2>/dev/null; then
+                    print_success "Downloaded $source_file → $target_relative"
+                else
+                    print_warning "Could not download $source_file from GitHub"
+                fi
             fi
          done
     fi

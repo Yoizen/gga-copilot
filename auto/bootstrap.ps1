@@ -211,7 +211,23 @@ try {
             Set-Content -Path $projectMd -Value $constitutionContent -Force
             Write-Success "Updated openspec/project.md"
         } else {
-            Write-Warning "CONSTITUTION.md not found in auto/ directory"
+            # Try to download from GitHub if local file not found
+            Write-Info "Downloading CONSTITUTION.md from GitHub..."
+            $baseUrl = "https://raw.githubusercontent.com/Yoizen/gga-copilot/main/auto"
+            $downloadUrl = "$baseUrl/CONSTITUTION.md"
+            
+            $openspecDir = Split-Path $projectMd -Parent
+            if (-not (Test-Path $openspecDir)) {
+                New-Item -ItemType Directory -Path $openspecDir -Force | Out-Null
+            }
+            
+            try {
+                $constitutionContent = Invoke-WebRequest -Uri $downloadUrl -ErrorAction Stop | Select-Object -ExpandProperty Content
+                Set-Content -Path $projectMd -Value $constitutionContent -Force
+                Write-Success "Downloaded CONSTITUTION.md -> openspec/project.md"
+            } catch {
+                Write-Warning "Could not download CONSTITUTION.md from GitHub"
+            }
         }
     } else {
         Write-Warning "Could not install OpenSpec"
@@ -388,7 +404,22 @@ foreach ($file in $filesToCopy) {
         Copy-Item $sourcePath $destPath -Force
         Write-Success "Copied $($file.Dest)"
     } else {
-        Write-Warning "$($file.Source) not found in auto/ directory"
+        # Try to download from GitHub if local file not found
+        Write-Info "Downloading $($file.Source) from GitHub..."
+        $baseUrl = "https://raw.githubusercontent.com/Yoizen/gga-copilot/main/auto"
+        $downloadUrl = "$baseUrl/$($file.Source)"
+        
+        $destDir = Split-Path -Parent $destPath
+        if (-not (Test-Path $destDir)) {
+            New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+        }
+        
+        try {
+            Invoke-WebRequest -Uri $downloadUrl -OutFile $destPath -ErrorAction Stop | Out-Null
+            Write-Success "Downloaded $($file.Source) -> $($file.Dest)"
+        } catch {
+            Write-Warning "Could not download $($file.Source) from GitHub"
+        }
     }
 }
 
