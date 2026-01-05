@@ -470,7 +470,7 @@ Write-Host "  - Configuration files (AGENTS.MD, REVIEW.md)" -ForegroundColor Gra
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor White
 Write-Host "  1. cd $TargetPath" -ForegroundColor Gray
-Write-Host "  2. Edit .gga to add your API_KEY" -ForegroundColor Gray
+Write-Host "  2. Review .gga config (provider is set to 'claude')" -ForegroundColor Gray
 Write-Host "  3. Customize AGENTS.MD for your project" -ForegroundColor Gray
 Write-Host "  4. code . (open in VS Code)" -ForegroundColor Gray
 Write-Host "  5. Start creating specs in specs/ directory" -ForegroundColor Gray
