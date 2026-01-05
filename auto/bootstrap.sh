@@ -505,7 +505,7 @@ show_next_steps() {
     echo -e "${CYAN}  • Development standards (AGENTS.MD, REVIEW.md)${NC}"
     echo ""
     echo -e "${YELLOW}Next steps:${NC}"
-    echo -e "${WHITE}  1. Review .gga config (provider is set to 'claude')${NC}"
+    echo -e "${WHITE}  1. Review .gga config (provider: copilot:claude-haiku-4.5)${NC}"
     echo -e "${WHITE}  2. Customize AGENTS.MD for your project${NC}"
     echo -e "${WHITE}  3. Start creating specs in specs/ directory${NC}"
     echo -e "${WHITE}  4. Run 'gga review' before committing code${NC}"
