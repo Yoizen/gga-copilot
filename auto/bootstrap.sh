@@ -189,6 +189,23 @@ install_speckit() {
         if [ $? -eq 0 ]; then
             print_success "OpenSpec installed successfully in project"
             
+            # Create bin directory and openspec wrapper
+            mkdir -p "$TARGET_DIR/bin"
+            local openspec_wrapper="$TARGET_DIR/bin/openspec"
+            if [ ! -f "$openspec_wrapper" ]; then
+                print_info "Creating openspec wrapper..."
+                cat > "$openspec_wrapper" << 'OPENSPEC_WRAPPER'
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$PROJECT_ROOT"
+exec npm exec openspec -- "$@"
+OPENSPEC_WRAPPER
+                chmod +x "$openspec_wrapper"
+                print_success "Created openspec wrapper"
+            fi
+            
             # Always init openspec to generate structure
             print_info "Initializing OpenSpec structure..."
             npm exec openspec init -- --tools "github-copilot" >/dev/null 2>&1
@@ -293,12 +310,37 @@ configure_target_repository() {
         mkdir -p "$repo_path/specs"
         print_success "Created specs directory"
         
+        # Create bin directory and wrappers
+        mkdir -p "$repo_path/bin"
+        
         # Initialize SpecKit in repository (DO THIS BEFORE COPYING FILES)
         if [ "$SKIP_SPECKIT" != true ]; then
+             # Create specify wrapper if it doesn't exist
+             local specify_bin="$repo_path/bin/specify"
+             if [ ! -f "$specify_bin" ]; then
+                 print_info "Creating specify wrapper..."
+                 cat > "$specify_bin" << 'WRAPPER_EOF'
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+VENV_DIR="$PROJECT_ROOT/.spec-kit-env"
+
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Error: SpecKit environment not found at $VENV_DIR"
+    echo "Run bootstrap again or install manually."
+    exit 1
+fi
+
+source "$VENV_DIR/bin/activate"
+exec specify "$@"
+WRAPPER_EOF
+                 chmod +x "$specify_bin"
+                 print_success "Created specify wrapper"
+             fi
+             
              # Always initialize SpecKit in repository
              print_info "Initializing SpecKit in repository..."
              
-             local specify_bin="$repo_path/bin/specify"
              if [ -f "$specify_bin" ]; then
                  "$specify_bin" init --here --ai copilot --no-git >/dev/null 2>&1
                  if [ $? -eq 0 ]; then
@@ -329,6 +371,12 @@ configure_target_repository() {
             
             local source="$script_dir/$source_file"
             local target="$repo_path/$target_relative"
+            
+            # Skip if source and target are the same file
+            if [ "$source" -ef "$target" ]; then
+                print_info "$target_relative already in place (same file)"
+                continue
+            fi
             
             if [ -f "$source" ]; then
                 mkdir -p "$(dirname "$target")"

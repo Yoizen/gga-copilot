@@ -159,6 +159,30 @@ if (-not $SkipSpecKit -and -not $UseOpenSpec) {
     if ($LASTEXITCODE -eq 0) {
         Write-Success "OpenSpec installed successfully in project"
         
+        # Create bin directory and openspec wrapper
+        $binDir = Join-Path $TargetPath "bin"
+        if (-not (Test-Path $binDir)) {
+            New-Item -ItemType Directory -Path $binDir -Force | Out-Null
+        }
+        
+        $openspecWrapper = Join-Path $binDir "openspec.ps1"
+        if (-not (Test-Path $openspecWrapper)) {
+            Write-Info "Creating openspec wrapper..."
+            $wrapperContent = @'
+# OpenSpec Wrapper for Windows
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
+
+Push-Location $ProjectRoot
+try {
+    & npm exec openspec -- @args
+} finally {
+    Pop-Location
+}
+'@
+            Set-Content -Path $openspecWrapper -Value $wrapperContent -Force
+            Write-Success "Created openspec wrapper"
+        }
+        
         # Init openspec to generate structure (non-interactive default)
         Write-Info "Initializing OpenSpec structure..."
         
@@ -237,10 +261,43 @@ if (-not (Test-Path ".git")) {
 
 # Initialize SpecKit or OpenSpec in repository
 if (-not $SkipSpecKit -and -not $UseOpenSpec) {
+    # Create bin directory if needed
+    $binDir = Join-Path $TargetPath "bin"
+    if (-not (Test-Path $binDir)) {
+        New-Item -ItemType Directory -Path $binDir -Force | Out-Null
+    }
+    
+    # Create specify wrapper if it doesn't exist
+    $specifyBin = Join-Path $TargetPath "bin\specify.ps1"
+    if (-not (Test-Path $specifyBin)) {
+        Write-Info "Creating specify wrapper..."
+        $wrapperContent = @'
+# SpecKit Wrapper for Windows
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
+$VenvDir = Join-Path $ProjectRoot ".spec-kit-env"
+
+if (-not (Test-Path $VenvDir)) {
+    Write-Error "SpecKit environment not found at $VenvDir"
+    Write-Host "Run bootstrap again or install manually."
+    exit 1
+}
+
+$activateScript = Join-Path $VenvDir "Scripts\Activate.ps1"
+if (Test-Path $activateScript) {
+    & $activateScript
+    & specify @args
+} else {
+    Write-Error "Cannot find activation script at $activateScript"
+    exit 1
+}
+'@
+        Set-Content -Path $specifyBin -Value $wrapperContent -Force
+        Write-Success "Created specify wrapper"
+    }
+    
     # Always initialize SpecKit in repository
     Write-Info "Initializing SpecKit in repository..."
     
-    $specifyBin = Join-Path $TargetPath "bin\specify.ps1"
     if (Test-Path $specifyBin) {
         & $specifyBin init --here --ai copilot --no-git | Out-Null
         if ($LASTEXITCODE -eq 0) {
@@ -311,6 +368,16 @@ foreach ($file in $filesToCopy) {
     $sourcePath = Join-Path $autoPath $file.Source
     $destPath = Join-Path $TargetPath $file.Dest
     
+    # Normalize paths for comparison
+    $sourcePathNorm = [System.IO.Path]::GetFullPath($sourcePath)
+    $destPathNorm = [System.IO.Path]::GetFullPath($destPath)
+    
+    # Skip if source and dest are the same file
+    if ($sourcePathNorm -eq $destPathNorm) {
+        Write-Info "$($file.Dest) already in place (same file)"
+        continue
+    }
+    
     if (Test-Path $sourcePath) {
         $destDir = Split-Path -Parent $destPath
         if (-not (Test-Path $destDir)) {
@@ -320,8 +387,6 @@ foreach ($file in $filesToCopy) {
         # Always copy (overwrite if exists)
         Copy-Item $sourcePath $destPath -Force
         Write-Success "Copied $($file.Dest)"
-            Write-Success "Copied $($file.Dest)"
-        }
     } else {
         Write-Warning "$($file.Source) not found in auto/ directory"
     }
