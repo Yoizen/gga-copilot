@@ -189,18 +189,21 @@ install_speckit() {
         if [ $? -eq 0 ]; then
             print_success "OpenSpec installed successfully in project"
             
-            # Init openspec to generate structure
+            # Always init openspec to generate structure
             print_info "Initializing OpenSpec structure..."
             npm exec openspec init -- --tools "github-copilot" >/dev/null 2>&1
             
-            # Copy CONSTITUTION.md to project.md
+            # Always copy CONSTITUTION.md to project.md
             local constitution_src="$script_dir/CONSTITUTION.md"
             local project_md="$TARGET_DIR/openspec/project.md"
             
-            if [ -f "$constitution_src" ] && [ -f "$project_md" ]; then
+            if [ -f "$constitution_src" ]; then
+                mkdir -p "$(dirname "$project_md")"
                 print_info "Copying CONSTITUTION.md content to openspec/project.md..."
                 cat "$constitution_src" > "$project_md"
                 print_success "Updated openspec/project.md"
+            else
+                print_warning "CONSTITUTION.md not found in auto/ directory"
             fi
         else
             print_warning "Could not install OpenSpec"
@@ -292,27 +295,19 @@ configure_target_repository() {
         
         # Initialize SpecKit in repository (DO THIS BEFORE COPYING FILES)
         if [ "$SKIP_SPECKIT" != true ]; then
-             local specify_config_path="$repo_path/.specify"
-             # If .specify exists but we want to force re-init or it's empty? 
-             # Just run init, it handles idempotency usually or we check.
-             # Logic from before: if ! -d or FORCE
+             # Always initialize SpecKit in repository
+             print_info "Initializing SpecKit in repository..."
              
-             if [ ! -d "$specify_config_path" ] || [ "$FORCE" = true ]; then
-                print_info "Initializing SpecKit in repository..."
-                
-                local specify_bin="$repo_path/bin/specify"
-                if [ -f "$specify_bin" ]; then
-                    "$specify_bin" init --here --ai copilot --no-git >/dev/null 2>&1
-                    if [ $? -eq 0 ]; then
-                        print_success "SpecKit initialized for Copilot"
-                    else
-                        print_warning "SpecKit initialization failed. Run './bin/specify init --here --ai copilot' manually."
-                    fi
-                else
-                    print_warning "Could not find specify wrapper at $specify_bin"
-                fi
+             local specify_bin="$repo_path/bin/specify"
+             if [ -f "$specify_bin" ]; then
+                 "$specify_bin" init --here --ai copilot --no-git >/dev/null 2>&1
+                 if [ $? -eq 0 ]; then
+                     print_success "SpecKit initialized for Copilot"
+                 else
+                     print_warning "SpecKit initialization failed. Run './bin/specify init --here --ai copilot' manually."
+                 fi
              else
-                print_info "SpecKit already initialized"
+                 print_warning "Could not find specify wrapper at $specify_bin"
              fi
         fi
 
@@ -320,6 +315,7 @@ configure_target_repository() {
         # Override REVIEW.md source if using OpenSpec (though we are in the else block here, keeping logic generic if needed)
         local review_source="REVIEW.md"
         
+        # Always copy configuration files (overwrite if exists)
         for file_key in "AGENTS.MD" "REVIEW.md" "CONSTITUTION.md"; do
             local source_file="$file_key"
             local target_relative=""
@@ -336,13 +332,8 @@ configure_target_repository() {
             
             if [ -f "$source" ]; then
                 mkdir -p "$(dirname "$target")"
-                
-                if [ "$FORCE" = true ] || [ ! -f "$target" ]; then
-                    cp "$source" "$target"
-                    print_success "Copied $source_file → $target_relative"
-                else
-                    print_info "$target_relative already exists (use --force to overwrite)"
-                fi
+                cp "$source" "$target"
+                print_success "Copied $source_file → $target_relative"
             else
                 print_warning "$source_file not found in auto/ directory"
             fi
@@ -383,21 +374,18 @@ EOF
         fi
     fi
     
-    # Initialize GGA in repository (common for both)
+    # Initialize GGA in repository (common for both) - ALWAYS run
     if [ "$SKIP_GGA" != true ]; then
-        if [ ! -f "$repo_path/.gga" ] || [ "$FORCE" = true ]; then
-            print_info "Initializing GGA in repository..."
-            if (cd "$repo_path" && gga init >/dev/null 2>&1); then
-                print_success "GGA initialized successfully"
-            else
-                print_warning "Failed to initialize GGA (run 'gga init' manually)"
-            fi
+        print_info "Initializing GGA in repository..."
+        if (cd "$repo_path" && gga init >/dev/null 2>&1); then
+            print_success "GGA initialized successfully"
         else
-            print_info ".gga already exists"
+            print_warning "Failed to initialize GGA (run 'gga init' manually)"
         fi
     fi
     
     # Copy REVIEW.md and AGENTS.MD for OpenSpec if they weren't copied above (since we split the block)
+    # Always copy REVIEW.md and AGENTS.MD for OpenSpec (overwrite if exists)
     if [ "$USE_OPENSPEC" = true ]; then
          local review_source="REVIEW_OPENSPEC.md"
          for file_key in "AGENTS.MD" "REVIEW.md"; do
@@ -412,10 +400,8 @@ EOF
             local source="$script_dir/$source_file"
             local target="$repo_path/$target_relative"
              if [ -f "$source" ]; then
-                if [ "$FORCE" = true ] || [ ! -f "$target" ]; then
-                    cp "$source" "$target"
-                    print_success "Copied $source_file → $target_relative"
-                fi
+                 cp "$source" "$target"
+                 print_success "Copied $source_file → $target_relative"
              fi
          done
     fi
