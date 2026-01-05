@@ -470,11 +470,9 @@ Write-Host "  - Configuration files (AGENTS.MD, REVIEW.md)" -ForegroundColor Gra
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor White
 Write-Host "  1. cd $TargetPath" -ForegroundColor Gray
-Write-Host "  2. code ." -ForegroundColor Gray
-    if ($UseOpenSpec) {
-        Write-Host "  3. Run: .\bin\openspec.ps1 init (to initialize OpenSpec)" -ForegroundColor Gray
-    } else {
-        Write-Host "  3. Run: .\bin\specify.ps1 init --here (optional, for full SpecKit template)" -ForegroundColor Gray
-    }
-Write-Host "  4. Start developing with specs!" -ForegroundColor Gray
+Write-Host "  2. Edit .gga to add your API_KEY" -ForegroundColor Gray
+Write-Host "  3. Customize AGENTS.MD for your project" -ForegroundColor Gray
+Write-Host "  4. code . (open in VS Code)" -ForegroundColor Gray
+Write-Host "  5. Start creating specs in specs/ directory" -ForegroundColor Gray
+Write-Host "  6. Run 'gga review' before committing code" -ForegroundColor Gray
 Write-Host ""

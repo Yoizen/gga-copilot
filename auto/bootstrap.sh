@@ -507,15 +507,8 @@ show_next_steps() {
     echo -e "${YELLOW}Next steps:${NC}"
     echo -e "${WHITE}  1. Edit .gga to add your API_KEY${NC}"
     echo -e "${WHITE}  2. Customize AGENTS.MD for your project${NC}"
-    
-    if [ "$USE_OPENSPEC" = true ]; then
-        echo -e "${WHITE}  3. Run: ./bin/openspec init (to initialize OpenSpec)${NC}"
-    else
-        echo -e "${WHITE}  3. Run: ./bin/specify init --here (optional, for full SpecKit template)${NC}"
-    fi
-
-    echo -e "${WHITE}  4. Start creating specs in specs/ directory${NC}"
-    echo -e "${WHITE}  5. Run 'gga review' before committing code${NC}"
+    echo -e "${WHITE}  3. Start creating specs in specs/ directory${NC}"
+    echo -e "${WHITE}  4. Run 'gga review' before committing code${NC}"
     echo ""
     echo -e "${YELLOW}Documentation:${NC}"
     echo -e "${WHITE}  • GGA: $GGA_DIR/README.md${NC}"
