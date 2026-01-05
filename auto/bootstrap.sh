@@ -257,13 +257,12 @@ install_gga() {
     print_step "Setting up GGA..."
     install_or_update_repo "$GGA_REPO" "$GGA_DIR" "gga-copilot"
     
-    # Run GGA installer if not already installed
-    if ! command_exists gga; then
-        print_info "Installing GGA system-wide..."
-        (cd "$GGA_DIR" && bash install.sh 2>/dev/null)
+    # Always ensure GGA is properly installed
+    print_info "Installing GGA system-wide..."
+    if (cd "$GGA_DIR" && bash install.sh >/dev/null 2>&1); then
         print_success "GGA installed"
     else
-        print_success "GGA already installed"
+        print_warning "GGA installation had issues, but may still work"
     fi
 }
 
@@ -439,6 +438,14 @@ EOF
         print_info "Initializing GGA in repository..."
         if (cd "$repo_path" && gga init >/dev/null 2>&1); then
             print_success "GGA initialized successfully"
+            
+            # Install GGA hooks in the repository
+            print_info "Installing GGA hooks..."
+            if (cd "$repo_path" && gga install >/dev/null 2>&1); then
+                print_success "GGA hooks installed"
+            else
+                print_warning "GGA hook installation had issues (run 'gga install' manually if needed)"
+            fi
         else
             print_warning "Failed to initialize GGA (run 'gga init' manually)"
         fi

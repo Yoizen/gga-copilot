@@ -240,25 +240,29 @@ try {
 if (-not $SkipGGA) {
     Write-Info "Installing GGA..."
     
-    $ggaPath = Join-Path $env:USERPROFILE ".gga"
+    $ggaPath = Join-Path $env:USERPROFILE ".local\share\yoizen\gga-copilot"
     
     if (Test-Path $ggaPath) {
-        if ($Force) {
-            Write-Info "Updating existing installation..."
-            Push-Location $ggaPath
-            git pull --quiet 2>&1 | Out-Null
-            Pop-Location
-            Write-Success "GGA updated successfully"
-        } else {
-            Write-Success "GGA already up to date"
-        }
+        Write-Info "Updating existing GGA installation..."
+        Push-Location $ggaPath
+        git fetch origin --quiet 2>&1 | Out-Null
+        git pull origin main --quiet 2>&1 | Out-Null
+        Pop-Location
     } else {
+        Write-Info "Cloning GGA repository..."
+        $ggaDir = Split-Path -Parent $ggaPath
+        New-Item -ItemType Directory -Path $ggaDir -Force | Out-Null
         git clone https://github.com/Yoizen/gga-copilot.git $ggaPath --quiet 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Warning "Could not clone GGA repository"
-        } else {
-            Write-Success "GGA installed successfully"
-        }
+    }
+    
+    if ($LASTEXITCODE -eq 0 -or (Test-Path $ggaPath)) {
+        Write-Info "Installing GGA system-wide..."
+        Push-Location $ggaPath
+        & .\install.ps1 2>&1 | Out-Null
+        Pop-Location
+        Write-Success "GGA installed successfully"
+    } else {
+        Write-Warning "Could not install GGA"
     }
     Write-Host ""
 }
@@ -340,12 +344,21 @@ if (-not $SkipGGA) {
         $ggaInitOutput = & gga init 2>&1
         if ($LASTEXITCODE -eq 0) {
             Write-Success "GGA initialized successfully"
+            
+            # Install GGA hooks in the repository
+            Write-Info "Installing GGA hooks..."
+            $ggaInstallOutput = & gga install 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "GGA hooks installed"
+            } else {
+                Write-Warning "GGA hook installation had issues (run 'gga install' manually if needed)"
+            }
         } else {
             Write-Warning "GGA init returned exit code $LASTEXITCODE"
         }
     } catch {
         Write-Warning "Could not run 'gga init': $_"
-        Write-Info "You can run 'gga init' manually later"
+        Write-Info "You can run 'gga init' and 'gga install' manually later"
     }
 }
 
