@@ -95,7 +95,7 @@ if (-not $SkipCopilotApi) {
             Write-Warning "Copilot API already installed (use -Force to update)"
         }
     } else {
-        git clone https://github.com/github/copilot-api.git $copilotPath --quiet 2>&1 | Out-Null
+        git clone https://github.com/Yoizen/copilot-api.git $copilotPath --quiet 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
             Write-Warning "Could not clone Copilot API repository"
         } else {
@@ -186,6 +186,8 @@ if (-not $SkipSpecKit -and -not $UseOpenSpec) {
             $constitutionContent = Get-Content $constitutionSrc -Raw
             Set-Content -Path $projectMd -Value $constitutionContent -Force
             Write-Success "Updated openspec/project.md"
+        } else {
+            Write-Warning "CONSTITUTION.md not found in auto/ directory"
         }
     } else {
         Write-Warning "Could not install OpenSpec"
@@ -235,24 +237,20 @@ if (-not (Test-Path ".git")) {
 
 # Initialize SpecKit or OpenSpec in repository
 if (-not $SkipSpecKit -and -not $UseOpenSpec) {
-    $specifyConfigPath = Join-Path $TargetPath ".specify"
-    if (-not (Test-Path $specifyConfigPath) -or $Force) {
-        Write-Info "Initializing SpecKit in repository..."
-        
-        $specifyBin = Join-Path $TargetPath "bin\specify.ps1"
-        if (Test-Path $specifyBin) {
-            & $specifyBin init --here --ai copilot --no-git | Out-Null
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "SpecKit initialized for Copilot"
-            } else {
-                Write-Warning "SpecKit initialization failed. Run '.\bin\specify.ps1 init --here --ai copilot' manually."
-            }
+    # Always initialize SpecKit in repository
+    Write-Info "Initializing SpecKit in repository..."
+    
+    $specifyBin = Join-Path $TargetPath "bin\specify.ps1"
+    if (Test-Path $specifyBin) {
+        & $specifyBin init --here --ai copilot --no-git | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "SpecKit initialized for Copilot"
         } else {
-             Write-Warning "Could not find specify wrapper at $specifyBin"
+            Write-Warning "SpecKit initialization failed. Run '.\bin\specify.ps1 init --here --ai copilot' manually."
         }
     } else {
-        Write-Info "SpecKit already initialized"
-    }
+             Write-Warning "Could not find specify wrapper at $specifyBin"
+        }
 } elseif ($UseOpenSpec) {
     # OpenSpec is initialized during the installation phase (see above)
     $openspecConfigPath = Join-Path $TargetPath "openspec"
@@ -261,25 +259,20 @@ if (-not $SkipSpecKit -and -not $UseOpenSpec) {
     }
 }
 
-# Initialize GGA in repository
+# Initialize GGA in repository - ALWAYS run
 if (-not $SkipGGA) {
-    $ggaConfigPath = Join-Path $TargetPath ".gga"
-    if (-not (Test-Path $ggaConfigPath) -or $Force) {
-        Write-Info "Initializing GGA in repository..."
-        try {
-            # Run gga init in the target directory
-            $ggaInitOutput = & gga init 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "GGA initialized successfully"
-            } else {
-                Write-Warning "GGA init returned exit code $LASTEXITCODE"
-            }
-        } catch {
-            Write-Warning "Could not run 'gga init': $_"
-            Write-Info "You can run 'gga init' manually later"
+    Write-Info "Initializing GGA in repository..."
+    try {
+        # Run gga init in the target directory
+        $ggaInitOutput = & gga init 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "GGA initialized successfully"
+        } else {
+            Write-Warning "GGA init returned exit code $LASTEXITCODE"
         }
-    } else {
-        Write-Info "GGA already initialized (.gga exists)"
+    } catch {
+        Write-Warning "Could not run 'gga init': $_"
+        Write-Info "You can run 'gga init' manually later"
     }
 }
 
@@ -324,10 +317,9 @@ foreach ($file in $filesToCopy) {
             New-Item -ItemType Directory -Path $destDir -Force | Out-Null
         }
         
-        if ((Test-Path $destPath) -and -not $Force) {
-            Write-Warning "$($file.Dest) already exists (use -Force to overwrite)"
-        } else {
-            Copy-Item $sourcePath $destPath -Force
+        # Always copy (overwrite if exists)
+        Copy-Item $sourcePath $destPath -Force
+        Write-Success "Copied $($file.Dest)"
             Write-Success "Copied $($file.Dest)"
         }
     } else {
