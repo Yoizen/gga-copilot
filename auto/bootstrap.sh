@@ -266,6 +266,37 @@ install_gga() {
     fi
 }
 
+configure_vscode() {
+    local repo_path="$1"
+    
+    # Create .vscode directory
+    local vscode_dir="$repo_path/.vscode"
+    mkdir -p "$vscode_dir"
+    
+    # Create settings.json with GitHub Copilot configuration
+    local settings_file="$vscode_dir/settings.json"
+    
+    if [ -f "$settings_file" ]; then
+        print_info "VS Code settings already exist, skipping..."
+        return
+    fi
+    
+    cat > "$settings_file" << 'EOF'
+{
+    "github.copilot.chat.useAgentsMdFile": true,
+    "chat.promptFilesRecommendations": {
+        "speckit.constitution": true,
+        "speckit.specify": true,
+        "speckit.plan": true,
+        "speckit.tasks": true,
+        "speckit.implement": true
+    }
+}
+EOF
+    
+    print_success "Created VS Code settings with Copilot configuration"
+}
+
 install_vscode_extensions() {
     if [ "$SKIP_VSCODE" = true ]; then
         print_info "Skipping VS Code extensions (--skip-vscode)"
@@ -450,6 +481,9 @@ EOF
             print_warning "Failed to initialize GGA (run 'gga init' manually)"
         fi
     fi
+    
+    # Configure VS Code settings for GitHub Copilot
+    configure_vscode "$repo_path"
     
     # Copy REVIEW.md and AGENTS.MD for OpenSpec if they weren't copied above (since we split the block)
     # Always copy REVIEW.md and AGENTS.MD for OpenSpec (overwrite if exists)

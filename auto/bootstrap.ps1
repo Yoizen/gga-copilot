@@ -362,6 +362,29 @@ if (-not $SkipGGA) {
     }
 }
 
+# Configure VS Code settings for GitHub Copilot
+$vscodeDir = Join-Path $TargetPath ".vscode"
+if (-not (Test-Path $vscodeDir)) {
+    New-Item -ItemType Directory -Path $vscodeDir -Force | Out-Null
+}
+
+$settingsFile = Join-Path $vscodeDir "settings.json"
+if (-not (Test-Path $settingsFile)) {
+    $vscodeSettings = @{
+        "github.copilot.chat.useAgentsMdFile" = $true
+        "chat.promptFilesRecommendations" = @{
+            "speckit.constitution" = $true
+            "speckit.specify" = $true
+            "speckit.plan" = $true
+            "speckit.tasks" = $true
+            "speckit.implement" = $true
+        }
+    } | ConvertTo-Json -Depth 10
+    
+    Set-Content -Path $settingsFile -Value $vscodeSettings -Force
+    Write-Success "Created VS Code settings with Copilot configuration"
+}
+
 # Ensure directory structure exists
 $specifyPath = Join-Path $TargetPath ".specify\memory"
 $specsPath = Join-Path $TargetPath "specs"

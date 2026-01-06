@@ -1,8 +1,127 @@
-# AI Agent Directives & Behavior Guidelines
+# NestJS Engineering Constitution & AI Agent Directives
 
-You are an expert **NestJS Engineer** paired with a strict **Guardian** system. Your primary goal is to generate code that passes the `Biome` linter and strict TypeScript checks on the *first try*.
+## Part 1: Core Principles (NON-NEGOTIABLE)
 
-## ⚡ Prime Directive: The "Virtual Linter"
+### I. Technology & Version Lock
+Technology versions are fixed to ensure stability and reproducibility across environments.
+- **Runtime**: Node.js Active LTS (defined in `.nvmrc` or `package.json` engines).
+- **Framework**: NestJS (Current Stable Major Version).
+- **Language**: TypeScript (Latest Stable). **Strict Mode**: `true`.
+- **Legacy Code Policy**: Any code not adhering to Clean Architecture principles is considered "Legacy". It must be refactorized, not extended.
+
+### II. Architecture Strategy
+Every NestJS service must adhere to **Modular Monolith** or **Microservices** patterns under **Clean Architecture** principles:
+
+1.  **Domain Layer (Pure)**:
+    - Contains Entities and Business Rules.
+    - ❌ **FORBIDDEN**: Dependencies on infrastructure (TypeORM, Axios, external NestJS modules).
+    - ❌ **FORBIDDEN**: ORM decorators inside Domain Entities.
+2.  **Application Layer (Orchestration)**:
+    - Contains Use Cases / Services.
+    - ✅ **ALLOWED**: Repository Interfaces (Ports).
+    - ❌ **FORBIDDEN**: Direct SQL/Redis queries (must use Repositories).
+3.  **Infrastructure Layer (Adapters)**:
+    - Contains Repository Implementations, HTTP Controllers, Cron Jobs.
+    - ✅ **ALLOWED**: Third-party libraries, Database Drivers.
+
+### III. Security-First
+- **Zero Trust**: All external communication must be encrypted (HTTPS/TLS).
+- **Secrets Management**: Credentials, tokens, and keys **MUST** reside in environment variables.
+    - ❌ `const apiKey = "1234"` (Immediate BLOCK in Code Review).
+- **Sanitization**: All public endpoints must use DTOs with strict validation (`class-validator` with `whitelist: true`).
+
+### IV. Observability & Reliability
+- **Structured Logging**: Mandatory use of `Pino` (JSON format in Production). No `console.log`.
+- **Tracing**: OpenTelemetry instrumentation ready for distributed tracing.
+- **Statelessness**: Services must not store state in local memory that needs to persist across restarts. Use Redis or SQL.
+
+---
+
+## Part 2: Coding Standards & Constraints
+
+### File & Complexity Limits
+Code must be readable and maintainable. If it exceeds these limits, it **must** be refactored.
+
+| Element | Max Limit | Recommended | Action if Exceeded |
+|:---|:---:|:---:|:---|
+| **File Length** | **500 lines** | 200-300 | Split into sub-services or utilities. |
+| **Method/Function** | **80 lines** | 20-40 | Extract logic to private methods or helpers. |
+| **Parameters** | 3 args | 1-2 | Use an `Options` object or DTO. |
+| **Injections (Constructor)** | 5 deps | 3-4 | Apply Facade Pattern or split responsibilities. |
+| **Cyclomatic Complexity** | 10 | < 5 | Simplify logic / Use early returns. |
+| **Nesting Depth** | 3 levels | 2 | Use Guard Clauses (`if (!ok) return;`). |
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|:---|:---|:---|
+| **Files** | `kebab-case` | `user-profile.service.ts` |
+| **Classes** | `PascalCase` | `UserProfileService` |
+| **Interfaces** | `I` + `PascalCase` | `IUserProfile` |
+| **Methods/Variables** | `camelCase` | `findActiveProfile()` |
+| **Constants** | `SCREAMING_SNAKE` | `MAX_RETRY_COUNT` |
+| **Database Columns** | `snake_case` | `created_at`, `user_id` |
+| **DTOs** | `PascalCase` + `Dto` | `CreateUserDto` |
+
+---
+
+## Part 3: Folder Structure & Organization
+
+### NestJS Feature Module (Standard)
+```text
+src/modules/users/
+├── controllers/       # HTTP Endpoints
+├── services/          # Application/Business Logic
+├── domain/            # (Optional) Pure Models if strict Clean Arch
+├── infrastructure/    # (Optional) Concrete Repositories
+├── dto/               # Data Transfer Objects (Validation)
+├── guards/            # Authorization Guards
+├── entities/          # DB Entities (TypeORM/Prisma/Mongoose)
+├── users.module.ts    # Module Definition
+└── users.constants.ts # Local constants
+
+```
+
+### Shared / Libs Structure
+
+Reusable code must reside in libraries or a `shared` module.
+
+```text
+libs/ (or src/shared/)
+├── database/          # Connection configs
+├── logging/           # Pino configuration
+├── utils/             # Pure helpers (dates, strings)
+└── filters/           # Global Exception Filters
+
+```
+
+---
+
+## Part 4: Best Practices
+
+### Error Handling
+
+* Use **Standard NestJS Exceptions** (`NotFoundException`, `BadRequestException`).
+* Never silently swallow errors.
+* `try/catch` blocks should only be used in Infrastructure layers or when calling external APIs.
+
+### Database Interaction
+
+* **Soft Deletes**: Mandatory for critical entities (`deletedAt`).
+* **Pagination**: Mandatory for endpoints returning lists (`limit`, `offset`/`cursor`).
+* **QueryBuilder**: Preferred over complex "magic" ORM methods for better performance and control.
+
+### Testing
+
+* **Unit Tests**: Minimum 80% coverage in `services/` and business logic.
+* **E2E Tests**: At least 1 success case and 1 error case per critical Controller.
+* **Mocking**: Do not depend on a real DB for unit tests.
+
+---
+
+## Part 5: AI Agent & Linter Directives
+
+### ⚡ Prime Directive: The "Virtual Linter"
 Before outputting ANY code block, you must run a recursive internal simulation of `npm run lint` (Biome).
 
 **If your generated code would fail the linter, you must FIX IT before showing it to the user.**
@@ -16,13 +135,11 @@ Before outputting ANY code block, you must run a recursive internal simulation o
     - Always include semicolons `;`.
     - Max line length: 80-100 characters (wrap long lines).
 
----
+### Implementation Workflow
 
-## 🏗 Implementation Workflow
+When asked to "Implement", "Refactor", or "Fix" something, follow this mental loop:
 
-When the user asks to "Implement", "Refactor", or "Fix" something, follow this mental loop:
-
-1.  **Analyze Context**: Read `CONSTITUTION.md` constraints (Layer boundaries, naming conventions).
+1.  **Analyze Context**: Read these constraints (Layer boundaries, naming conventions).
 2.  **Draft Code**: Generate the solution mentally.
 3.  **Audit (The Agent Step)**:
     - *Check:* Does this file exceed 500 lines? -> **Action:** Split it.
@@ -30,16 +147,12 @@ When the user asks to "Implement", "Refactor", or "Fix" something, follow this m
     - *Check:* Are there hardcoded secrets? -> **Action:** Replace with `ConfigService`.
 4.  **Final Output**: Present only the sanitized, compliant code.
 
----
-
-## 🛡 Security & Safety Gates
+### Security & Safety Gates
 
 - **Secrets**: If you see a hardcoded password/key in the user's prompt or code, **WARNING** the user immediately and refactor it to use `process.env`.
 - **Destructive Actions**: If asked to `DROP` tables or `rm -rf`, ask for explicit confirmation and explain risks.
 
----
-
-## 📝 Code Documentation Strategy
+### Code Documentation Strategy
 
 - **Public Methods**: Must have JSDoc explaining `@param` and `@returns`.
 - **Complex Logic**: Add a comment explaining *WHY*, not *WHAT*.
@@ -47,23 +160,9 @@ When the user asks to "Implement", "Refactor", or "Fix" something, follow this m
     - Comments/Code: **English**.
     - User Interaction/Explanation: **English** (unless user speaks Spanish, then adapt).
 
----
-
-## 🚀 NestJS Specific Patterns
+### NestJS Specific Patterns
 
 1.  **Controllers**: Keep them thin. Delegate logic to Services immediately.
 2.  **Services**: Use Dependency Injection via constructor.
 3.  **DTOs**: Always decorate properties with `class-validator` (e.g., `@IsString()`, `@IsOptional()`).
 4.  **Configs**: Never use `process.env.VAR` directly in code. Use `ConfigService.get('VAR')`.
-
----
-
-## Example of "Agent Thinking"
-
-**Bad Output (Do NOT do this):**
-```typescript
-// Copilot generating lazy code
-const getData = (req) => {
-    const user = db.query("SELECT * FROM users WHERE id=" + req.id); // SQL Injection + No Types
-    return user;
-}
