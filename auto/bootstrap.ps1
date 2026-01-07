@@ -494,7 +494,7 @@ Write-Host "  Setup Complete!" -ForegroundColor Green
 Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Your repository is now configured with:" -ForegroundColor White
-Write-Host "  - GGA (Gentleman Guardian Angel)" -ForegroundColor Gray
+Write-Host "  - GGA (Guardian Anget)" -ForegroundColor Gray
     if ($UseOpenSpec) {
         Write-Host "  - OpenSpec (Spec-First methodology)" -ForegroundColor Gray
     } else {

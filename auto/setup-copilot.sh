@@ -149,7 +149,7 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}Step 5: Installing GGA (Gentleman Guardian Angel)...${NC}"
+echo -e "${GREEN}Step 5: Installing GGA (Guardian Agent)...${NC}"
 
 # Install GGA to user's local bin directory
 GGA_INSTALL_DIR="$HOME/.local/gga"
@@ -183,7 +183,7 @@ if [[ ":$PATH:" != *":$GGA_BIN_DIR:"* ]]; then
     fi
     
     echo "" >> "$RC_FILE"
-    echo "# GGA (Gentleman Guardian Angel)" >> "$RC_FILE"
+    echo "# GGA (Guardian Agent)" >> "$RC_FILE"
     echo "export PATH=\"\$PATH:$GGA_BIN_DIR\"" >> "$RC_FILE"
     
     export PATH="$PATH:$GGA_BIN_DIR"
@@ -296,7 +296,7 @@ echo "Creating spec-kit workflow configuration..."
 cat > "$CURRENT_REPO/SPEC_WORKFLOW.md" << 'EOF'
 # Spec-Kit + GGA Workflow Configuration
 
-This project uses spec-kit for specification-driven development integrated with GGA (Gentleman Guardian Angel) for automated code review.
+This project uses spec-kit for specification-driven development integrated with GGA (Guardian Agent) for automated code review.
 
 ## Workflow Steps
 

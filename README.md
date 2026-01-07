@@ -1,74 +1,30 @@
-# 🤖 Guardian Angel
+# 🤖 Guardian Agent
 
 **Provider-agnostic AI code review** — Enforce coding standards on every commit using Claude, Gemini, Codex, Ollama, or any LLM. **Pure Bash** (Linux/Mac) or **PowerShell** (Windows).
 
-![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Bash](https://img.shields.io/badge/bash-5.0%2B-orange.svg)
-![Tests](https://img.shields.io/badge/tests-68%20passing-brightgreen.svg)
+![Version](https://img.shields.io/badge/version-2.2.0-blue.svg) ![License](https://img.shields.io/badge/license-MIT-green.svg) ![Tests](https://img.shields.io/badge/tests-68%20passing-brightgreen.svg)
 
-## Why?
+## 🚀 Quick Install
 
-Automate code review enforcement on every commit. Validate staged files against your `REVIEW.md` rules—like having a senior developer review every line before it hits the repo.
+### One-Liner Commands
 
-## Installation
-
-### 🚀 Quick Setup (Recommended)
-
-**Automated setup with GGA + SpecKit + Copilot API for any repository:**
-
-#### Windows (PowerShell)
+**Windows (PowerShell):**
 ```powershell
-# Setup current repository
-git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
-cd gga\auto
-.\bootstrap.ps1
+iex (irm https://raw.githubusercontent.com/Yoizen/gga-copilot/main/auto/bootstrap.ps1)
 ```
 
-#### macOS/Linux (Bash)
+**macOS/Linux (Bash):**
 ```bash
-# Setup current repository
-git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
-cd gga/auto
-./bootstrap.sh
+bash <(curl -s https://raw.githubusercontent.com/Yoizen/gga-copilot/main/auto/bootstrap.sh)
 ```
-
-This will automatically:
-- ✅ Install GGA, SpecKit, and Copilot API
-- ✅ Configure your repository with coding standards
-- ✅ Install VS Code extensions
-- ✅ Create specs/ directory structure
-- ✅ Set up pre-commit hooks
 
 **See [auto/README.md](auto/README.md) for advanced options.**
 
 ---
 
-### Manual Installation
+## Why?
 
-#### macOS/Linux - Homebrew
-```bash
-brew tap gentleman-programming/tap
-brew install gga
-```
-
-#### macOS/Linux - Manual
-```bash
-git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
-cd gga && ./install.sh
-```
-
-#### Windows - PowerShell
-```powershell
-git clone https://github.com/Gentleman-Programming/gentleman-guardian-angel.git
-cd gga
-PowerShell.exe -ExecutionPolicy Bypass -File install.ps1
-```
-
-**Note:** Windows requires PowerShell 5.0+. If execution is restricted:
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
+Automate code review enforcement on every commit. Validate staged files against your `REVIEW.md` rules—like having a senior developer review every line before it hits the repo.
 
 ## Quick Start
 
@@ -135,23 +91,13 @@ Pre-configured templates available:
 
 ## Providers
 
-| Provider | Config | Installation |
-|----------|--------|--------------|
-| **Claude** | `claude` | [claude.ai/code](https://claude.ai/code) |
-| **Gemini** | `gemini` | [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) |
-| **Codex** | `codex` | `npm i -g @openai/codex` |
-| **GitHub Copilot** | `copilot:<model>` | [copilot-api](https://github.com/aaamoon/copilot-api) on port 4141 |
-| **Ollama** | `ollama:<model>` | [ollama.ai](https://ollama.ai) |
+| Provider | Config |
+|----------|--------|
+| **Claude** | `claude` |
+| **Gemini** | `gemini` |
+| **GitHub Copilot** | `copilot:claude-haiku-4.5` |
 
-Examples:
-```bash
-PROVIDER="claude"
-PROVIDER="gemini"
-PROVIDER="copilot:claude-haiku-4.5"        # Claude Haiku 4.5
-PROVIDER="copilot:gpt-4o"                  # GPT-4 Omni
-PROVIDER="ollama:llama3.2"
-PROVIDER="ollama:codellama"
-```
+Edit `.gga` to change provider.
 
 ## Smart Caching
 
@@ -181,40 +127,9 @@ git commit
 
 ## Integration
 
-### Native Git Hook (Default)
-The `gga install` command automatically installs a pre-commit hook.
+**Git Hook** (default): `gga install` installs pre-commit hook automatically.
 
-### Husky (JavaScript/TypeScript)
-```bash
-npm install -D husky
-npx husky init
-
-# Edit .husky/pre-commit
-gga run || exit 1
-```
-
-### pre-commit (Python)
-```yaml
-# .pre-commit-config.yaml
-repos:
-  - repo: local
-    hooks:
-      - id: gga
-        name: Guardian Agent
-        entry: gga run
-        language: system
-        pass_filenames: false
-```
-
-### Lefthook (All languages)
-```yaml
-# lefthook.yml
-pre-commit:
-  parallel: false
-  commands:
-    ai-review:
-      run: gga run
-```
+**Husky**, **pre-commit**, **Lefthook**: See [auto/README.md](auto/README.md) for setup.
 
 ## Bypass Review
 
@@ -245,18 +160,10 @@ echo "# My Coding Standards" > REVIEW.md
 ## Development
 
 ```bash
-# Install test dependencies
-brew install shellspec shellcheck
-
-# Run all tests (68 total)
-make test
-
-# Run specific tests
-make test-unit        # Unit tests
-make test-integration # Integration tests
-
-# Lint and test
-make check
+make test          # Run all tests (68 total)
+make test-unit     # Unit tests only
+make test-integration  # Integration tests only
+make check         # Lint and test
 ```
 
 ## Project Structure
@@ -276,10 +183,11 @@ gentleman-guardian-angel/
 
 ## License
 
-MIT © 2024
+MIT © 2026
 
 ---
 
-<p align="center">
-  <sub>Built with 🧉 by developers tired of repeating the same code review comments</sub>
-</p>
+
+Run copilot api
+cd ~/.local/share/yoizen/copilot-api && npm start -- start 
+

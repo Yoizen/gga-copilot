@@ -1,7 +1,5 @@
 # Constitution (Engineering Standards)
 
-> This document is now consolidated with **AGENTS.MD** for a single source of truth.
-
 ## 📖 Read the Complete Guide
 
 All engineering principles, coding standards, best practices, AI agent directives, and governance rules are documented in:

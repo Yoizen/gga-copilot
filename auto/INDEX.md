@@ -2,7 +2,7 @@
 
 ## 📖 Descripción General
 
-Este directorio contiene todos los scripts necesarios para automatizar la configuración de GGA (Gentleman Guardian Angel) y SpecKit en cualquier repositorio.
+Este directorio contiene todos los scripts necesarios para automatizar la configuración de GGA (Guardian Anget) y SpecKit en cualquier repositorio.
 
 ## 🗂 Archivos y su Propósito
 

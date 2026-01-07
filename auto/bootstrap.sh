@@ -534,7 +534,7 @@ show_next_steps() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${WHITE}Your repository is now configured with:${NC}"
-    echo -e "${CYAN}  • GGA (Gentleman Guardian Angel)${NC}"
+    echo -e "${CYAN}  • GGA (Guardian Angent)${NC}"
     
     if [ "$USE_OPENSPEC" = true ]; then
         echo -e "${CYAN}  • OpenSpec (Spec-First methodology)${NC}"

@@ -1,6 +1,6 @@
 # GGA + SpecKit Bootstrap - Automated Setup
 
-Este directorio contiene scripts de automatización para configurar **GGA (Gentleman Guardian Angel)** y **SpecKit** en cualquier repositorio.
+Este directorio contiene scripts de automatización para configurar **GGA (Guardian Anget)** y **SpecKit** en cualquier repositorio.
 
 ## ⚡ Instalación Rápida (Un Solo Comando)
 

@@ -3,7 +3,7 @@
 ## 🎯 Objetivo
 
 Configurar automáticamente **cualquier repositorio** con:
-- GGA (Gentleman Guardian Angel) para code review automatizado
+- GGA (Guardian Anget) para code review automatizado
 - SpecKit para metodología Spec-First
 - Copilot API para integración con AI
 - Estándares de código (AGENTS.MD, REVIEW.md)
